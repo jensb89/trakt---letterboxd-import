@@ -11,6 +11,6 @@ In addition your trakt.tv username, password and apikey have either to be filled
 
 
 ##Thanks##
-Some code-parts where taken from https://github.com/akampjes/trakt-list-import !
+Some code-parts were taken from https://github.com/akampjes/trakt-list-import !
 
 
