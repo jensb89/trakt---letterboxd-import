@@ -13,9 +13,9 @@ import time
 import os.path
 
 
-CLIEN_ID= ''
-CLIEN_SECRECT = ''
-CODE = ''
+CLIEN_ID= '' #Fill in your client id
+CLIEN_SECRECT = '' #Fill in your client secred
+CODE = '' #Fill in your code, which you get after authorization with your trakt account
 
 
 def check_authentication():
