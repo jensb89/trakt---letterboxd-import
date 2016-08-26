@@ -11,6 +11,7 @@ import getpass
 import csv
 import time
 import os.path
+import datetime
 
 
 CLIEN_ID= '' #Fill in your client id
@@ -97,12 +98,13 @@ def authorize(auth_code, grant_type='authorization_code', code=CODE):
     #print response_body
 
 
-def get_data_letterboxd_diary(filename):
+def get_data_letterboxd(filename,diary=True):
+    #diary true for diary file, false for watched file (no watched date)
     data = []
     with open(filename, 'rb') as csvfile:
-        diary = csv.reader(csvfile, delimiter=',')
-        next(diary) #skip header
-        for row in diary:
+        letterboxd_data = csv.reader(csvfile, delimiter=',')
+        next(letterboxd_data) #skip header
+        for row in letterboxd_data:
             print 'Get imdbID for ' +  row[1] + '(' + row[2] + ')'
             imdbinfo = get_imdb_info(row[1], year=int(row[2]))
             #print imdbinfo
@@ -112,8 +114,12 @@ def get_data_letterboxd_diary(filename):
                 print "Failed! IMDB ID was not found. Try to add movie to trakt w/o ID."
 
             imdbid = imdbinfo.get('imdbID',None)
-            data.append([row[1],row[2],row[6]+' 20:15',imdbid])
-            print [row[1],row[2],row[6]+' 20:15',imdbid]
+            if diary:
+                data.append([row[1],row[2],row[6]+' 20:15',imdbid])
+                print [row[1],row[2],row[6]+' 20:15',imdbid]
+            else:
+                data.append([row[1],row[2],datetime.datetime.utcnow().isoformat(),imdbid])
+                print [row[1],row[2],datetime.datetime.utcnow().isoformat(),imdbid]
             time.sleep(0.2)
 
     return data
@@ -157,6 +163,7 @@ def usage(argv0):
     OPTIONS
     -h
     --help          Show help
+    --watched       Use watched.csv file instead of diary (no watched date!!)
     --debug         Turn on debuging mode (doesn't exist)
     EXAMPLE USAGE
         python py-trakt-letterboxd-import.py diary.csv
@@ -164,9 +171,10 @@ def usage(argv0):
     sys.exit(1)
 
 if __name__ == "__main__":
+    use_diary_file = True
     try:
-        args, letterboxd_file = getopt.gnu_getopt(sys.argv[1:], 'h',[
-            'help'])
+        args, letterboxd_file = getopt.gnu_getopt(sys.argv[1:], 'h:w',[
+            'help','watched'])
     except:
         print "\nPlease  c h e c k   a r g u m e n t s\n\n"
         usage(sys.argv[0])
@@ -174,6 +182,8 @@ if __name__ == "__main__":
     for opt, arg in args:
         if opt in ['--help', '-h']:
             usage(sys.argv[0])
+        elif opt == '--watched':
+            use_diary_file = False 
         else:
             print('unknown option '+opt)
             usage(sys.argv[0])
@@ -182,7 +192,8 @@ if __name__ == "__main__":
     token = check_authentication()
 
     print letterboxd_file[0]
-    data = get_data_letterboxd_diary(letterboxd_file[0])
+    data = get_data_letterboxd(letterboxd_file[0],use_diary_file)
+
     print str(len(data)) + 'movies in file.' 
     movie_data = [];
 
