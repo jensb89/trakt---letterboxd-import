@@ -3,6 +3,9 @@ trakt---letterboxd-import
 
 Import Letterboxd movie list (diary or movie list) into trakt.tv.
 
+## UPDATE (06.2017)
+Currently the omdb Api which is used to get the imdb id for each movie has gone private. That means the script will currently fail. A solution is to comment out line 109-116 and set imbd=None afterwards. The omdb Api will probably be free to use again very soon, so I didn't update the code for now.
+
 ##Usage:##
 1. Export your Letterboxd data (under Settings->Import&Export)
 2. Create a trakt.tv application (http://trakt.tv/oauth/applications). Use "urn:ietf:wg:oauth:2.0:oob" as the redirect URI.
