@@ -19,6 +19,10 @@ CLIEN_SECRECT = '' #Fill in your client secred
 CODE = '' #Fill in your code, which you get after authorization with your trakt account
 
 
+# Optional: Use an API for obtaining imdb id
+CHECK_IMDB_ID = False # Useful for clearly identifying the movie in case the title at letterboxd is dfferent from imdb
+API_URL_FOR_IMDB_ID = 'http://www.omdbapi.com/?apikey=YOURAPIKEY&t=' #Fill in your Api key if you want to use omdbapi
+
 def check_authentication():
     if os.path.isfile('auth.json'):
         with open('auth.json') as auth_file:
@@ -105,15 +109,19 @@ def get_data_letterboxd(filename,diary=True):
         letterboxd_data = csv.reader(csvfile, delimiter=',')
         next(letterboxd_data) #skip header
         for row in letterboxd_data:
-            print 'Get imdbID for ' +  row[1] + '(' + row[2] + ')'
-            imdbinfo = get_imdb_info(row[1], year=int(row[2]))
-            #print imdbinfo
-            if imdbinfo['Response'] != 'False':
-                print "Success!"
-            else:
-                print "Failed! IMDB ID was not found. Try to add movie to trakt w/o ID."
 
-            imdbid = imdbinfo.get('imdbID',None)
+            if CHECK_IMDB_ID:
+                print 'Get imdbID for ' +  row[1] + '(' + row[2] + ')'
+                imdbinfo = get_imdb_info(row[1], year=int(row[2]))
+                print imdbinfo
+                if imdbinfo['Response'] != 'False':
+                    print "Success!"
+                else:
+                    print "Failed! IMDB ID was not found. Try to add movie to trakt w/o ID."
+                imdbid = imdbinfo.get('imdbID',None)
+            else:
+                imdbid = None
+
             if diary:
                 data.append([row[1],row[2],row[6]+' 20:15',imdbid])
                 print [row[1],row[2],row[6]+' 20:15',imdbid]
@@ -149,9 +157,9 @@ def send_data(movie_data, auth_token):
 
 def get_imdb_info(title, year=None):
     if year != None:
-        s='http://omdbapi.com/?t='+title+'&y='+str(year)
+        s=API_URL_FOR_IMDB_ID+title+'&y='+str(year)
     else:
-        s='http://omdbapi.com/?t='+title
+        s=API_URL_FOR_IMDB_ID+title
     url = urllib2.urlopen(s.replace(' ','%20'))
     data = url.read()
     res = json.loads(data)
