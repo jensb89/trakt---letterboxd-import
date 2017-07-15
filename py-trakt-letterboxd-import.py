@@ -21,7 +21,8 @@ CODE = '' #Fill in your code, which you get after authorization with your trakt 
 
 # Optional: Use an API for obtaining imdb id
 CHECK_IMDB_ID = False # Useful for clearly identifying the movie in case the title at letterboxd is dfferent from imdb
-API_URL_FOR_IMDB_ID = 'http://www.omdbapi.com/?apikey=YOURAPIKEY&t=' #Fill in your Api key if you want to use omdbapi
+#API_URL_FOR_IMDB_ID = 'http://www.omdbapi.com/?apikey=YOURAPIKEY&t=' #Fill in your Api key if you want to use omdbapi
+API_URL_FOR_IMDB_ID = 'http://theapache64.xyz:8080/movie_db/search?keyword='
 
 def check_authentication():
     if os.path.isfile('auth.json'):
@@ -114,11 +115,13 @@ def get_data_letterboxd(filename,diary=True):
                 print 'Get imdbID for ' +  row[1] + '(' + row[2] + ')'
                 imdbinfo = get_imdb_info(row[1], year=int(row[2]))
                 print imdbinfo
-                if imdbinfo['Response'] != 'False':
+                if imdbinfo['error_code'] == 0:
                     print "Success!"
+                    imdbid = imdbinfo['data'].get('imdb_id',None)
+
                 else:
                     print "Failed! IMDB ID was not found. Try to add movie to trakt w/o ID."
-                imdbid = imdbinfo.get('imdbID',None)
+                    imdbid = None
             else:
                 imdbid = None
 
@@ -162,7 +165,7 @@ def get_imdb_info(title, year=None):
         s=API_URL_FOR_IMDB_ID+title
     url = urllib2.urlopen(s.replace(' ','%20'))
     data = url.read()
-    res = json.loads(data)
+    res = json.loads(data.decode('latin-1'))
     return res
 
 def usage(argv0):
