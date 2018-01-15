@@ -204,6 +204,7 @@ if __name__ == "__main__":
 
     print str(len(data)) + 'movies in file.' 
     movie_data = [];
+    skipped = [];
 
     for line in data:
         title = line[0]
@@ -212,7 +213,10 @@ if __name__ == "__main__":
         imdbid = line[3]
         #print date_played
         #print time.strftime(date_played, '%Y-%m-%d %H:%M')
-        movie_data.append({'title':title,'year':int(year),'watched_at': date_played,'ids':{'imdb_id':imdbid}})
+        if not year: #if for some reason a year information is not available the entry is skipped
+            skipped.append(title)
+        else:
+            movie_data.append({'title':title,'year':int(year),'watched_at': date_played,'ids':{'imdb_id':imdbid}})
 
         # send batch of 100 IMDB IDs
         if len(movie_data) >= 100:
@@ -221,4 +225,8 @@ if __name__ == "__main__":
             movie_data = []
 
     if len(movie_data) > 0:
-            send_data(movie_data,auth_token=token)
+        send_data(movie_data,auth_token=token)
+
+    if len(skipped) > 0:
+        print str(len(skipped)) + ' movie(s) skipped due to missing year information:'
+        print skipped
