@@ -123,8 +123,8 @@ def get_data_letterboxd(filename,diary=True):
                 imdbid = None
 
             if diary:
-                data.append([row[1],row[2],row[6]+' 20:15',imdbid])
-                print [row[1],row[2],row[6]+' 20:15',imdbid]
+                data.append([row[1],row[2],row[7]+' 20:15',imdbid])
+                print [row[1],row[2],row[7]+' 20:15',imdbid]
             else:
                 data.append([row[1],row[2],datetime.datetime.utcnow().isoformat(),imdbid])
                 print [row[1],row[2],datetime.datetime.utcnow().isoformat(),imdbid]
