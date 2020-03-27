@@ -123,16 +123,16 @@ def get_data_letterboxd(filename,diary=True):
                 imdbid = None
 
             if diary:
-                data.append([row[1],row[2],row[7]+' 20:15',imdbid])
-                print [row[1],row[2],row[7]+' 20:15',imdbid]
+                data.append([row[1],row[2],row[7]+' 20:15',imdbid,row[4]])
+                print [row[1],row[2],row[7]+' 20:15',imdbid,row[4]]
             else:
-                data.append([row[1],row[2],'released',imdbid])
-                print [row[1],row[2],'released',imdbid]
+                data.append([row[1],row[2],'released',imdbid,None])
+                print [row[1],row[2],'released',imdbid,None]
             time.sleep(0.2)
 
     return data
 
-def send_data(movie_data, auth_token):
+def send_data(movie_data, auth_token, diary=True):
     #movie_data = [{'imdb_id':imdb_id,'title':title,'year':year,'last_played': date_played}]
     pydata = {
             'movies': movie_data
@@ -154,6 +154,15 @@ def send_data(movie_data, auth_token):
     f = open('log.txt','a')
     print >> f, response
     f.close()
+    
+    if diary:
+        req = urllib2.Request('https://api-v2launch.trakt.tv/sync/ratings', data=json_data, headers=headers)
+        f = urllib2.urlopen(req)
+        response = f.read()
+        f.close()
+        f = open('log.txt','a')
+        print >> f, response
+        f.close()
 
 def get_imdb_info(title, year=None):
     if year != None:
@@ -211,21 +220,26 @@ if __name__ == "__main__":
         year = line[1]
         date_played = line[2]
         imdbid = line[3]
+        try:
+            rating = int(float(line[4])*2)
+        except:
+            rating = None
+
         #print date_played
         #print time.strftime(date_played, '%Y-%m-%d %H:%M')
         if not year: #if for some reason a year information is not available the entry is skipped
             skipped.append(title)
         else:
-            movie_data.append({'title':title,'year':int(year),'watched_at': date_played,'ids':{'imdb_id':imdbid}})
+            movie_data.append({'title':title,'year':int(year),'watched_at': date_played,'rating':rating,'rated_at':date_played,'ids':{'imdb_id':imdbid} })
 
         # send batch of 100 IMDB IDs
         if len(movie_data) >= 100:
             print 'Importing first 100 movies...'
-            send_data(movie_data,auth_token=token)
+            send_data(movie_data,token,use_diary_file)
             movie_data = []
 
     if len(movie_data) > 0:
-        send_data(movie_data,auth_token=token)
+        send_data(movie_data,token,use_diary_file)
 
     if len(skipped) > 0:
         print str(len(skipped)) + ' movie(s) skipped due to missing year information:'
