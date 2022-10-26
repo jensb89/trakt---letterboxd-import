@@ -13,6 +13,7 @@ import time
 import os.path
 import datetime
 
+import urllib
 
 CLIEN_ID= '' #Fill in your client id
 CLIEN_SECRECT = '' #Fill in your client secred
@@ -166,10 +167,10 @@ def send_data(movie_data, auth_token, diary=True):
 
 def get_imdb_info(title, year=None):
     if year != None:
-        s=API_URL_FOR_IMDB_ID+title+'&y='+str(year)
+        s=API_URL_FOR_IMDB_ID+urllib.quote_plus(title)+'&y='+str(year)
     else:
-        s=API_URL_FOR_IMDB_ID+title
-    url = urllib2.urlopen(s.replace(' ','%20'))
+        s=API_URL_FOR_IMDB_ID+urllib.quote_plus(title)
+    url = urllib2.urlopen(s)
     data = url.read()
     res = json.loads(data)
     return res
