@@ -108,7 +108,7 @@ def authorize(auth_code, grant_type='authorization_code', code=CODE):
 def get_data_letterboxd(filename,diary=True):
     #diary true for diary file, false for watched file (no watched date)
     data = []
-    with open(filename, 'r') as csvfile:
+    with open(filename, 'r', encoding='utf-8') as csvfile:
         letterboxd_data = csv.reader(csvfile, delimiter=',')
         next(letterboxd_data) #skip header
         for row in letterboxd_data:
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     print(letterboxd_file[0])
     data = get_data_letterboxd(letterboxd_file[0],use_diary_file)
 
-    print(str(len(data)) + 'movies in file.')
+    print(str(len(data)) + ' movies in file.')
     movie_data = [];
     skipped = [];
 
@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
         # send batch of 100 IMDB IDs
         if len(movie_data) >= 100:
-            print('Importing first 100 movies...')
+            print('Importing next 100 movies...')
             send_data(movie_data,token,use_diary_file)
             movie_data = []
 
