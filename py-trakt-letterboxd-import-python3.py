@@ -1,17 +1,14 @@
 #!/usr/bin/python
 
-import re
 import sys
 import urllib.request as urllib2
 import json
 import getopt
 import time
-import hashlib
-import getpass
 import csv
 import time
 import os.path
-import datetime
+from time import sleep
 
 import urllib
 
@@ -34,7 +31,7 @@ def check_authentication():
 
             if expired:
                 print('Authentification expired, trying to re-authentificate...')
-                authorize(REFRESH_TOKEN,'refresh')
+                authorize(REFRESH_TOKEN,'refresh_token')
                 return check_authentication()
 
             return TOKEN
@@ -46,7 +43,6 @@ def check_authentication():
 
 
 def authorize(auth_code, grant_type='authorization_code', code=CODE):
-
     if grant_type == 'authorization_code':
 
         values = {
@@ -68,14 +64,13 @@ def authorize(auth_code, grant_type='authorization_code', code=CODE):
         }
 
     else:
-        print('grant_type has to be authorization_code or refresh_token!!!')
+        raise Exception('grant_type has to be authorization_code or refresh_token!!!')
 
     headers = {
       'Content-Type': 'application/json'
     }
 
-
-    request = urllib2.Request('https://api-v2launch.trakt.tv/oauth/token', data=json.dumps(values).encode('utf-8'), headers=headers)
+    request = urllib2.Request('https://api.trakt.tv/oauth/token', data=json.dumps(values).encode('utf-8'), headers=headers)
 
     try:
         r = urllib2.urlopen(request)
@@ -101,8 +96,6 @@ def authorize(auth_code, grant_type='authorization_code', code=CODE):
         f = open('auth.json','w')
         print(req.decode(), file=f)
         f.close()
-
-    #print response_body
 
 
 def get_data_letterboxd(filename,diary=True):
@@ -149,7 +142,7 @@ def send_data(movie_data, auth_token, diary=True):
     'trakt-api-version': '2',
     'trakt-api-key': CLIEN_ID
     }
-    req = urllib2.Request('https://api-v2launch.trakt.tv/sync/history', data=json_data.encode('utf-8'), headers=headers)
+    req = urllib2.Request('https://api.trakt.tv/sync/history', data=json_data.encode('utf-8'), headers=headers)
 
     f = urllib2.urlopen(req)
     response = f.read()
@@ -157,9 +150,10 @@ def send_data(movie_data, auth_token, diary=True):
     f = open('log.txt','a')
     print(response.decode(), file=f) 
     f.close()
-    
+
     if diary:
-        req = urllib2.Request('https://api-v2launch.trakt.tv/sync/ratings', data=json_data.encode('utf-8'), headers=headers)
+        sleep(1) #prevent rate limit error
+        req = urllib2.Request('https://api.trakt.tv/sync/ratings', data=json_data.encode('utf-8'), headers=headers)
         f = urllib2.urlopen(req)
         response = f.read()
         f.close()
@@ -169,9 +163,9 @@ def send_data(movie_data, auth_token, diary=True):
 
 def get_imdb_info(title, year=None):
     if year != None:
-        s=API_URL_FOR_IMDB_ID+urllib.quote_plus(title)+'&y='+str(year)
+        s=API_URL_FOR_IMDB_ID+urllib.parse.quote_plus(title)+'&y='+str(year)
     else:
-        s=API_URL_FOR_IMDB_ID+urllib.quote_plus(title)
+        s=API_URL_FOR_IMDB_ID+urllib.parse.quote_plus(title)
     url = urllib2.urlopen(s)
     data = url.read()
     res = json.loads(data)
@@ -233,7 +227,7 @@ if __name__ == "__main__":
         if not year: #if for some reason a year information is not available the entry is skipped
             skipped.append(title)
         else:
-            movie_data.append({'title':title,'year':int(year),'watched_at': date_played,'rating':rating,'rated_at':date_played,'ids':{'imdb_id':imdbid} })
+            movie_data.append({'title':title,'year':int(year),'watched_at': date_played,'rating':rating,'rated_at':date_played,'ids':{'imdb':imdbid} })
 
         # send batch of 100 IMDB IDs
         if len(movie_data) >= 100:
