@@ -2,6 +2,7 @@ trakt---letterboxd-import
 =========================
 
 Import Letterboxd movie list (diary or movie list) into trakt.tv.
+Tested with python 3.10.
 
 ## Usage:
 1. Export your Letterboxd data (under Settings->Import&Export)
@@ -19,7 +20,7 @@ There is the possibility to optionally use an API for retrieving the imdB id for
 If you decide to use it set `CHECK_IMDB_ID = True` and specify an API Url. Typical APIs to use:
 
 1. OmdB Api (was free, currently is [private only](https://www.patreon.com/posts/api-is-going-10743518) and you need to apply for an [API key](http://www.omdbapi.com/apikey.aspx)) (typically 1000keys per day are given out for free)
-2. [TheApache64 API](https://github.com/theapache64/movie_db) A free IMDB Api provided by github User theapache64. An implentation into the trakt-letterboxd importer can be found in this branch: [Click](https://github.com/jensb89/trakt---letterboxd-import/tree/theapache64Api) 
+2. (outdated) [TheApache64 API](https://github.com/theapache64/movie_db) A free IMDB Api provided by github User theapache64. An implentation into the trakt-letterboxd importer can be found in this branch: [Click](https://github.com/jensb89/trakt---letterboxd-import/tree/theapache64Api) 
 
 ## Thanks
 Some code-parts were taken from https://github.com/akampjes/trakt-list-import !
